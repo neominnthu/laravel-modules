@@ -8,11 +8,21 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to create a middleware class inside a module.
+ */
 class MakeMiddlewareCommand extends Command
 {
     protected $signature = 'module:make:middleware {module} {name}';
     protected $description = 'Create a middleware class inside a module.';
 
+    /**
+     * Execute the middleware file creation command.
+     *
+     * @param Filesystem $files Filesystem instance.
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS/FAILURE).
+     */
     public function handle(Filesystem $files, ModuleManager $manager): int
     {
         $module = Str::studly($this->argument('module'));

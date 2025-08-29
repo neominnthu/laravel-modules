@@ -4,34 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
 
-### Planned
-
-- Asset publishing refinements
-- Per-module test generators
-
-### Added (Unreleased)
-
-- Middleware generator command (`module:make:middleware`)
-- Eager + lazy tests for middleware alias & event listener parity
-- ModuleManager::enabledModules() convenience method
-- Verbose flag for module:list showing dependencies & lazy/eager mode
-- Community & governance docs: CODE_OF_CONDUCT.md, SECURITY.md, updated CONTRIBUTING.md
-- Added docs/ scaffold README & composer funding/support metadata
-- Static analysis baseline (phpstan + larastan) & composer analyse script
-- Dedicated exception class `ModuleManifestException` for manifest errors
-- `module:cache` command for explicit cache building
-- GitHub Actions CI workflow for tests, static analysis, and code style
-
-### Changed (Unreleased)
+### Changed
 
 - Documentation: added lazy auto-registration section, middleware generator usage details, verbose list command
 - README: document `module:cache` command and CI workflow
+- All console commands and support classes now have complete PHPDoc blocks and code style polish
 
-### Fixed (Unreleased)
+### Fixed
 
-- (placeholder)
+- Static analysis errors resolved (type hints, generics, instantiation)
+- Composer.json and phpstan.neon.dist updated for Laravel 12 compatibility
+
+### CI Validation
+
+- CI workflow validated: runs static analysis, tests, and code style on every push and PR
+
+### Release Prep
+
+- Ready for production release: all code, docs, and tests are polished and validated
 
 ## [1.0.0] - 2025-08-29
 

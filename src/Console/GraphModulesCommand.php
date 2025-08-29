@@ -7,11 +7,20 @@ use Illuminate\Console\Command;
 use Modules\Support\ModuleManager;
 use Modules\Support\ModuleManifest;
 
+/**
+ * Artisan command to show the module dependency graph (table, JSON, or DOT format).
+ */
 class GraphModulesCommand extends Command
 {
     protected $signature = 'module:graph {--json : Output JSON instead of table} {--dot : Output Graphviz DOT format}';
     protected $description = 'Show module dependency graph';
 
+    /**
+     * Execute the graph command to display module dependencies.
+     *
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS).
+     */
     public function handle(ModuleManager $manager): int
     {
         $modules = $manager->discover();

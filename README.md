@@ -1,34 +1,65 @@
-# Laravel Modules (myvendor/laravel-modules)
 
-A professional modular system for Laravel 12 applications. Create, enable, disable, cache and extend self‑contained modules (routes, views, migrations, configs, events, middleware) with artisan generators.
+# Laravel Modules (`neominnthu/laravel-modules`)
+
+[![Latest Stable Version](https://img.shields.io/packagist/v/neominnthu/laravel-modules.svg)](https://packagist.org/packages/neominnthu/laravel-modules)
+[![CI](https://github.com/neominnthu/laravel-modules/actions/workflows/ci.yml/badge.svg)](https://github.com/neominnthu/laravel-modules/actions)
+[![License](https://img.shields.io/github/license/neominnthu/laravel-modules.svg)](LICENSE)
+
+
+A professional modular system for Laravel 12 applications. Create, enable, disable, cache, and extend self-contained modules (routes, views, migrations, configs, events, middleware) with artisan generators.
 
 > Status: Core phases 1–4 implemented (discovery, manager, providers, generators, lazy loading, auto middleware & event registration). Upcoming: advanced asset publishing, per-module tests, richer caching strategies.
 
+
+
 ## Features
 
-- Module scaffolding: `php artisan module:make Blog --api`
-- Auto discovery & (optional lazy) provider registration
-- Enable / disable modules: `module:enable`, `module:disable`, list with `module:list`
-- Resource loading (routes web/api/console, views, migrations, configs)
-- Generators: controller, model (with `-m` migration), event, listener
-- Additional generators: migration, seeder, factory, test, middleware
-- Event & middleware auto-discovery
-- Cached manifest (`bootstrap/cache/modules.php`) with optional lazy provider boot
-- Facade + helper (`Module::call('Blog@method')`, `module_path('Blog')`)
-- Pest test ready (scaffold placeholder)
+- **Module scaffolding**: Quickly create new modules with all necessary structure using `php artisan module:make Blog --api`.
+- **Auto discovery & lazy provider registration**: Modules are discovered automatically and can be registered lazily for performance.
+- **Enable / disable modules**: Use `module:enable`, `module:disable`, and list with `module:list` to manage modules at runtime.
+- **Resource loading**: Seamlessly load routes (web/api/console), views, migrations, and configs per module.
+- **Generators**: Artisan commands for controller, model (with migration), event, listener, migration, seeder, factory, test, middleware.
+- **Event & middleware auto-discovery**: Automatically register events and middleware defined in modules.
+- **Cached manifest**: Fast boot with manifest cache (`bootstrap/cache/modules.php`), supports lazy provider boot.
+- **Facade + helper**: Use `Module::call('Blog@method')` and `module_path('Blog')` for easy module interaction.
+- **Strict dependency validation**: Prevents loading modules with missing or disabled dependencies.
+- **Graph visualization**: Output module dependency graph in table, JSON, or DOT format.
+- **Pest test ready**: Scaffold and run tests for modules using Pest and Testbench.
+
+## Why Use This?
+
+- Modularize large Laravel applications for better maintainability and scalability.
+- Clean separation of features, routes, and resources.
+- Rapid prototyping with built-in generators.
+- Strict dependency management and validation.
+- Easy integration with CI and static analysis tools.
+
 
 ## Requirements
 
 - PHP >= 8.3
 - Laravel 12.x
 
-## Installation (Once Published)
+
+
+## Installation
 
 ```bash
-composer require myvendor/laravel-modules
+composer require neominnthu/laravel-modules
 ```
 
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+
+## License
+
+This package is open-sourced software licensed under the [MIT license](LICENSE).
+
+
 ## Quick Start
+
 
 1. Publish config (optional):
 
@@ -36,27 +67,30 @@ composer require myvendor/laravel-modules
 php artisan vendor:publish --tag=modules-config
 ```
 
-1. Create a module:
+
+2. Create a module:
 
 ```bash
 php artisan module:make Blog --api
 ```
 
-1. List modules:
 
+3. List modules:
 
 ```bash
 php artisan module:list
 ```
 
-1. Disable / enable:
+
+4. Disable / enable:
 
 ```bash
 php artisan module:disable Blog
 php artisan module:enable Blog
 ```
 
-1. Generate artifacts inside a module:
+
+5. Generate artifacts inside a module:
 
 ```bash
 php artisan module:make:controller Blog Post
@@ -65,11 +99,30 @@ php artisan module:make:event Blog PostPublished
 php artisan module:make:listener Blog SendNotification --event=PostPublished
 ```
 
-1. Call a module provider method lazily:
+6. Call a module provider method lazily:
 
 ```php
 Module::call('Blog@someMethod');
+	```
+
+
+## Module Version Constraints
+
+Each module can declare required versions for its dependencies in `module.json`:
+
+```json
+{
+	"name": "Shop",
+	"version": "1.1.0",
+	"provider": "Modules\\Shop\\Providers\\ShopServiceProvider",
+	"dependencies": ["Blog"],
+	"dependency_versions": { "Blog": ">=1.0.0" }
+}
 ```
+
+When enabling or validating modules, the manager will check that all required dependency versions are satisfied. If a dependency does not meet the constraint, an error will be thrown.
+
+Supported constraints: `^1.0.0`, `>=1.0.0`, `=1.2.3`, `<2.0.0`, etc.
 
 ## Configuration
 
@@ -199,6 +252,35 @@ app('modules.manager')->buildCache();
 
 Recommended: keep `strict_dependencies` enabled in production for safety.
 
+
+## Hot Reload (Runtime Enable/Disable)
+
+You can enable or disable modules at runtime without restarting the application. This is achieved by unregistering a module's service provider and related bindings.
+
+**Unregister a provider at runtime:**
+
+```php
+app('modules.manager')->unregisterProvider('Blog');
+```
+
+This marks the provider as unregistered and optionally clears related bindings, aliases, and events. Re-enable the module and rebuild the cache to restore its provider:
+
+```php
+Module::enable('Blog');
+app('modules.manager')->buildCache();
+```
+
+**Testing hot reload:**
+
+Check if a provider is registered:
+
+```php
+$manager = app('modules.manager');
+$manager->isProviderRegistered('Modules\\Blog\\Providers\\BlogServiceProvider'); // true or false
+```
+
+This feature is useful for development, testing, and advanced runtime scenarios where modules may need to be toggled without a full application restart.
+
 ## Roadmap
 
 - Asset publishing tag for per-module assets
@@ -207,6 +289,64 @@ Recommended: keep `strict_dependencies` enabled in production for safety.
 - Module version constraints & dependency graph
 - Hot reload / watch mode in dev
 - Module dependency graph visualization
+
+
+## Manifest Sync & Validation
+
+Scan and optionally fix all module manifest files for required fields and schema:
+
+```bash
+php artisan module:manifest:sync
+```
+
+Add `--fix` to automatically add missing fields and normalize arrays:
+
+```bash
+php artisan module:manifest:sync --fix
+```
+
+Reports issues and actions taken. Ensures all manifests have `name`, `version`, and `provider` fields, and arrays are normalized.
+
+## Code Coverage Reporting
+
+Run Pest code coverage for all modules or a specific module:
+
+```bash
+php artisan module:coverage
+php artisan module:coverage Blog
+```
+
+Shows coverage report for all modules or just the specified module. Useful for tracking test coverage and quality.
+
+## Cache Status Reporting
+
+Show module cache status and details:
+
+```bash
+php artisan module:cache:status
+```
+
+Displays cache file path, number of modules cached, last updated time, file size, and lists cached modules.
+
+## Per-Module Test Listing
+
+List all Pest test files in a module:
+
+```bash
+php artisan module:test:list Blog
+```
+
+Shows all test files in `Modules/Blog/Tests/`.
+
+## Per-Module Test Generator
+
+You can generate Pest test files inside any module using:
+
+```bash
+php artisan module:make:test Blog ExampleTest
+```
+
+This creates `Modules/Blog/Tests/ExampleTest.php` with a Pest test scaffold. The stub uses your module name and is ready for custom assertions.
 
 ## Commands Overview
 
@@ -230,19 +370,30 @@ Recommended: keep `strict_dependencies` enabled in production for safety.
 | module:validate | Validate dependency integrity |
 | module:graph | Show dependency graph (supports --json, --dot flags) |
 
+
 ## Publishing Module Resources
 
-Each module automatically registers a publish tag `module-{name}` (lowercased). You can publish all module resources at once:
+Each module supports publishing its config, views, and translations using Laravel's vendor:publish command.
+
+- **Per-module tag:** `module-{name}` (e.g., `module-blog`)
+- **Global tag:** `modules-resources` (publishes all modules)
+
+To publish all module resources at once:
 
 ```bash
 php artisan vendor:publish --tag=modules-resources
 ```
 
-Or a single module (example for Blog):
+To publish resources for a single module (example for Blog):
 
 ```bash
 php artisan vendor:publish --tag=module-blog
 ```
+
+This will publish:
+- Config: `Config/config.php` → `config/{name}.php`
+- Views: `Resources/views` → `resources/views/vendor/{name}`
+- Translations: `Resources/lang` → `resources/lang/vendor/{name}`
 
 ## Auto-loading Factories
 

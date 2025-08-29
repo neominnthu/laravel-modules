@@ -8,11 +8,21 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to create a database seeder inside a module.
+ */
 class MakeSeederCommand extends Command
 {
     protected $signature = 'module:make:seeder {module} {name}';
     protected $description = 'Create a database seeder inside a module.';
 
+    /**
+     * Execute the seeder file creation command.
+     *
+     * @param Filesystem $files Filesystem instance.
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS/FAILURE).
+     */
     public function handle(Filesystem $files, ModuleManager $manager): int
     {
         $module = Str::studly($this->argument('module'));

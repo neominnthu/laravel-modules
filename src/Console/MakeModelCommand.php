@@ -8,11 +8,21 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to create an Eloquent model inside a module (optionally with migration).
+ */
 class MakeModelCommand extends Command
 {
     protected $signature = 'module:make:model {module} {name} {--m|migration : Create a migration file}';
     protected $description = 'Create an Eloquent model inside a module (optionally with migration).';
 
+    /**
+     * Execute the model file creation command.
+     *
+     * @param Filesystem $files Filesystem instance.
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS/FAILURE).
+     */
     public function handle(Filesystem $files, ModuleManager $manager): int
     {
         $module = Str::studly($this->argument('module'));

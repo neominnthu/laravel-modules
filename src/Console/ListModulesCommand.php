@@ -7,11 +7,20 @@ use Illuminate\Console\Command;
 use Modules\Support\ModuleManager;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Artisan command to list modules and their status, version, and dependencies.
+ */
 class ListModulesCommand extends Command
 {
     protected $signature = 'module:list {--verbose : Show dependencies when enabled} {--json : Output as JSON}';
     protected $description = 'List modules and status';
 
+    /**
+     * Execute the module listing command.
+     *
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (0 = success).
+     */
     public function handle(ModuleManager $manager): int
     {
         $io = new SymfonyStyle($this->input, $this->output);

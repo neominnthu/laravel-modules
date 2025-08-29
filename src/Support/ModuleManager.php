@@ -14,8 +14,54 @@ use InvalidArgumentException;
 /**
  * Central service responsible for discovering, caching and querying modules.
  */
+/**
+ * Central service responsible for discovering, caching, and querying modules.
+ * Handles registry, manifest, provider registration, dependency validation, and cache management.
+ */
 class ModuleManager
 {
+    /**
+     * Check if a provider is registered (for hot reload testing).
+     */
+    public function isProviderRegistered(string $provider): bool
+    {
+        return isset($this->registeredProviders[$provider]);
+    }
+
+    /**
+     * Unregister a module's service provider at runtime (hot reload).
+     */
+    public function unregisterProvider(string $name): void
+    {
+        $manifest = $this->manifest($name);
+        $provider = $manifest['provider'] ?? null;
+        if ($provider && isset($this->registeredProviders[$provider])) {
+            // Remove provider from the container (Laravel does not natively support unregister, so we mark as unregistered)
+            unset($this->registeredProviders[$provider]);
+            // Optionally, clear related bindings, aliases, events, etc. (custom logic can be added here)
+        }
+    }
+
+    /**
+     * Validate dependency version constraints for all enabled modules.
+     * Throws InvalidArgumentException if any constraint is not satisfied.
+     */
+    public function validateDependencyVersions(): void
+    {
+        foreach ($this->enabledModules() as $name) {
+            $manifest = new ModuleManifest($this->path($name));
+            $depVersions = $manifest->dependencyVersions();
+            foreach ($depVersions as $dep => $constraint) {
+                if (! $this->enabled($dep)) {
+                    continue; // dependency not enabled, skip
+                }
+                $depVersion = $this->version($dep);
+                if (! \Modules\Support\Semver::satisfies($depVersion, $constraint)) {
+                    throw new InvalidArgumentException("Module [{$name}] requires {$dep} version {$constraint}, found {$depVersion}");
+                }
+            }
+        }
+    }
     /** Path to modules root inside host app */
     public const MODULES_DIR = 'Modules';
 
@@ -34,6 +80,13 @@ class ModuleManager
     /** @var array<string,bool> Providers already registered */
     protected array $registeredProviders = [];
 
+    /**
+     * ModuleManager constructor.
+     *
+     * @param string $basePath Path to the application base directory.
+     * @param Filesystem $files Filesystem instance (default: new Filesystem).
+     * @param CacheRepository|null $cache Optional cache repository.
+     */
     public function __construct(
         protected readonly string $basePath,
         protected readonly Filesystem $files = new Filesystem(),
@@ -206,6 +259,9 @@ class ModuleManager
     /**
      * Build cache structure and write file.
      */
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function buildCache(): array
     {
         $data = [];
@@ -253,7 +309,7 @@ class ModuleManager
         if ($this->files->exists($file)) {
             /** @var array<string,array<string,mixed>> $data */
             $data = include $file;
-            return $data;
+        return $data;
         }
         return $this->buildCache();
     }

@@ -8,11 +8,20 @@ use Illuminate\Console\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to build and write the compiled module manifest cache file.
+ */
 class CacheModulesCommand extends Command
 {
     protected $signature = 'module:cache';
     protected $description = 'Build and write the compiled module manifest cache file';
 
+    /**
+     * Execute the cache build command.
+     *
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (0 = success).
+     */
     public function handle(ModuleManager $manager): int
     {
         $io = new SymfonyStyle($this->input, $this->output);

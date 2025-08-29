@@ -8,11 +8,21 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to create a Pest test file within a module's tests directory.
+ */
 class MakeTestCommand extends Command
 {
     protected $signature = 'module:make:test {module} {name : Test file name (without .php)}';
     protected $description = 'Create a Pest test file within a module tests directory.';
 
+    /**
+     * Execute the test file creation command.
+     *
+     * @param Filesystem $files Filesystem instance.
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS/FAILURE).
+     */
     public function handle(Filesystem $files, ModuleManager $manager): int
     {
         $module = Str::studly($this->argument('module'));

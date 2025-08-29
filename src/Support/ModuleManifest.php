@@ -13,6 +13,12 @@ class ModuleManifestException extends \RuntimeException {}
 /**
  * Represents a single module's manifest (module.json) file.
  */
+/**
+ * Represents a single module's manifest (module.json) file.
+ * Handles manifest loading, dependency/version parsing, and array conversion.
+ *
+ * @implements Arrayable<string, mixed>
+ */
 class ModuleManifest implements Arrayable
 {
     public const MANIFEST_FILENAME = 'module.json';
@@ -20,11 +26,26 @@ class ModuleManifest implements Arrayable
     /** @var array<string,mixed> */
     protected array $data = [];
 
+    /**
+     * ModuleManifest constructor.
+     *
+     * @param string $basePath Path to the module directory.
+     * @param Filesystem $files Filesystem instance (default: new Filesystem).
+     */
     public function __construct(
         protected readonly string $basePath,
         protected readonly Filesystem $files = new Filesystem()
     ) {
         $this->load();
+    }
+    /**
+     * Declared dependency version constraints (array: module => constraint)
+     * @return array<string,string>
+     */
+    public function dependencyVersions(): array
+    {
+        $depVers = $this->data['dependency_versions'] ?? [];
+        return is_array($depVers) ? $depVers : [];
     }
 
     /**

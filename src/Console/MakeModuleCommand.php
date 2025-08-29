@@ -8,11 +8,21 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to scaffold a new module with standard structure.
+ */
 class MakeModuleCommand extends Command
 {
     protected $signature = 'module:make {name : The module name} {--api : Include api route file}';
     protected $description = 'Scaffold a new module with standard structure';
 
+    /**
+     * Execute the module scaffolding command.
+     *
+     * @param Filesystem $files Filesystem instance.
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS/FAILURE).
+     */
     public function handle(Filesystem $files, ModuleManager $manager): int
     {
         $name = Str::studly($this->argument('name'));

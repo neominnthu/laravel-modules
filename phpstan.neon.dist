@@ -1,13 +1,8 @@
-includes:
-    - vendor/nunomaduro/larastan/extension.neon
-
 parameters:
     paths:
         - src
     level: 6
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: true
-    larastan:
-        analyse: true
     ignoreErrors:
         - '#Call to an undefined method Illuminate\\Contracts\\Foundation\\Application::make#'

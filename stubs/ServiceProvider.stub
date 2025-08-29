@@ -26,5 +26,22 @@ class DummyNameServiceProvider extends ServiceProvider
         $this->loadViewsFrom($modulePath . '/Resources/views', 'dummyname');
         $this->loadMigrationsFrom($modulePath . '/Database/Migrations');
         $this->mergeConfigFrom($modulePath . '/Config/config.php', 'dummyname');
+
+        if ($this->app->runningInConsole()) {
+            $publishes = [];
+            if (file_exists($modulePath . '/Config/config.php')) {
+                $publishes[$modulePath . '/Config/config.php'] = config_path('dummyname.php');
+            }
+            if (is_dir($modulePath . '/Resources/views')) {
+                $publishes[$modulePath . '/Resources/views'] = resource_path('views/vendor/dummyname');
+            }
+            if (is_dir($modulePath . '/Resources/lang')) {
+                $publishes[$modulePath . '/Resources/lang'] = resource_path('lang/vendor/dummyname');
+            }
+            if ($publishes) {
+                $this->publishes($publishes, 'module-dummyname');
+                $this->publishes($publishes, 'modules-resources');
+            }
+        }
     }
 }

@@ -9,14 +9,24 @@ use Modules\Support\ModuleManifest;
 use Modules\Support\ModuleManifestException;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Artisan command to validate module manifests and dependencies.
+ * Checks for missing/disabled dependencies and cycles.
+ */
 class ValidateModulesCommand extends Command
 {
     protected $signature = 'module:validate {--no-strict : Ignore strict dependency filtering}';
     protected $description = 'Validate module manifests & dependencies';
 
+    /**
+     * Execute the validation command.
+     *
+     * @param ModuleManager $manager The module manager instance.
+     * @return int Exit code (0 = success, 1 = issues found).
+     */
     public function handle(ModuleManager $manager): int
     {
-        $io = new SymfonyStyle($this->getInput(), $this->getOutput());
+    $io = new SymfonyStyle($this->input, $this->output);
         $issues = [];
         $all = $manager->discover();
         $graph = [];

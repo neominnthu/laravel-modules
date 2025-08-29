@@ -77,24 +77,28 @@ class ModulesServiceProvider extends ServiceProvider
             ], 'modules-config');
 
             // Register artisan commands
-            $this->commands([
-                \Modules\Console\MakeModuleCommand::class,
-                \Modules\Console\EnableModuleCommand::class,
-                \Modules\Console\DisableModuleCommand::class,
-                \Modules\Console\ListModulesCommand::class,
-                \Modules\Console\ClearModulesCacheCommand::class,
-                \Modules\Console\MakeControllerCommand::class,
-                \Modules\Console\MakeModelCommand::class,
-                \Modules\Console\MakeEventCommand::class,
-                \Modules\Console\MakeListenerCommand::class,
-                \Modules\Console\ValidateModulesCommand::class,
-                \Modules\Console\GraphModulesCommand::class,
-                \Modules\Console\MakeMigrationCommand::class,
-                \Modules\Console\MakeSeederCommand::class,
-                \Modules\Console\MakeFactoryCommand::class,
-                \Modules\Console\MakeTestCommand::class,
-                \Modules\Console\MakeMiddlewareCommand::class,
-            ]);
+                $this->commands([
+                    \Modules\Console\MakeModuleCommand::class,
+                    \Modules\Console\EnableModuleCommand::class,
+                    \Modules\Console\DisableModuleCommand::class,
+                    \Modules\Console\ListModulesCommand::class,
+                    \Modules\Console\ClearModulesCacheCommand::class,
+                    \Modules\Console\MakeControllerCommand::class,
+                    \Modules\Console\MakeModelCommand::class,
+                    \Modules\Console\MakeEventCommand::class,
+                    \Modules\Console\MakeListenerCommand::class,
+                    \Modules\Console\ValidateModulesCommand::class,
+                    \Modules\Console\GraphModulesCommand::class,
+                    \Modules\Console\MakeMigrationCommand::class,
+                    \Modules\Console\MakeSeederCommand::class,
+                    \Modules\Console\MakeFactoryCommand::class,
+                    \Modules\Console\MakeTestCommand::class,
+                    \Modules\Console\MakeMiddlewareCommand::class,
+                    \Modules\Console\SyncManifestCommand::class,
+                    \Modules\Console\ListModuleTestsCommand::class,
+                    \Modules\Console\CacheStatusCommand::class,
+                    \Modules\Console\CoverageModulesCommand::class,
+                ]);
         }
     }
 

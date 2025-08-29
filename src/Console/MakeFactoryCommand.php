@@ -8,11 +8,21 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Modules\Support\ModuleManager;
 
+/**
+ * Artisan command to create a model factory inside a module.
+ */
 class MakeFactoryCommand extends Command
 {
     protected $signature = 'module:make:factory {module} {name} {--model= : Model class (without namespace) to bind}';
     protected $description = 'Create a model factory inside a module.';
 
+    /**
+     * Execute the factory file creation command.
+     *
+     * @param Filesystem $files Filesystem instance.
+     * @param ModuleManager $manager Module manager instance.
+     * @return int Exit code (SUCCESS/FAILURE).
+     */
     public function handle(Filesystem $files, ModuleManager $manager): int
     {
         $module = Str::studly($this->argument('module'));
