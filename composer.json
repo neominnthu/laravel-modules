@@ -1,7 +1,6 @@
 {
   "name": "neominnthu/laravel-modules",
   "description": "A Laravel 12 modular system package for creating and managing application modules.",
-  "version": "0.2.0",
   "type": "library",
   "license": "MIT",
   "keywords": ["laravel", "modules", "modular", "package"],
