@@ -1,12 +1,12 @@
 {
-  "name": "myvendor/laravel-modules",
+  "name": "neominnthu/laravel-modules",
   "description": "A Laravel 12 modular system package for creating and managing application modules.",
   "version": "0.2.0",
   "type": "library",
   "license": "MIT",
   "keywords": ["laravel", "modules", "modular", "package"],
   "authors": [
-    {"name": "Your Name", "email": "you@example.com"}
+  {"name": "Neominn Thu", "email": "tomozaki.neo@gmail.com"}
   ],
   "require": {
     "php": ">=8.3",
@@ -30,8 +30,8 @@
       {"type": "github", "url": "https://github.com/sponsors/yourname"}
     ],
     "support": {
-      "issues": "https://github.com/yourname/laravel-modules/issues",
-      "source": "https://github.com/yourname/laravel-modules"
+  "issues": "https://github.com/neominnthu/laravel-modules/issues",
+  "source": "https://github.com/neominnthu/laravel-modules"
     }
   },
   "autoload-dev": {
