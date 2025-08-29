@@ -1,0 +1,7 @@
+{
+  "preset": "laravel",
+  "rules": {
+    "strict_types": true,
+    "phpdoc_summary": true
+  }
+}

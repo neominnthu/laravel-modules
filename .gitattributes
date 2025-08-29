@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# Ignore exports
+/.github export-ignore
+/tests export-ignore
+/docs export-ignore
+/stubs export-ignore

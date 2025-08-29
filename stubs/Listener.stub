@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\DummyName\Listeners;
+
+use Modules\DummyName\Events\DummyEvent;
+
+class DummyListener
+{
+    public function handle(DummyEvent $event): void
+    {
+        // Handle the event.
+    }
+}

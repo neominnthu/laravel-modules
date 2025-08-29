@@ -1,0 +1,5 @@
+{
+  "name": "DummyName",
+  "version": "1.0.0",
+  "provider": "Modules\\DummyName\\Providers\\DummyNameServiceProvider"
+}

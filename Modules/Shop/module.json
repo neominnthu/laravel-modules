@@ -1,0 +1,6 @@
+{
+  "name": "Shop",
+  "version": "1.0.0",
+  "provider": "Modules\\Shop\\Providers\\ShopServiceProvider",
+  "dependencies": ["Blog"]
+}

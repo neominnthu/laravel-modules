@@ -1,0 +1,19 @@
+<?php
+declare(strict_types=1);
+
+namespace Modules\DummyName\Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class DummyClassFactory extends Factory
+{
+    /** @var class-string<\Illuminate\Database\Eloquent\Model>|string */
+    protected $model = DummyModel::class; // Adjust or pass --model option
+
+    public function definition(): array
+    {
+        return [
+            // 'name' => $this->faker->name(),
+        ];
+    }
+}

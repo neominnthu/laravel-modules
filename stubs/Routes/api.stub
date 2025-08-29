@@ -1,0 +1,7 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::middleware('api')->get('/dummyname/ping', function () {
+    return response()->json(['pong' => true]);
+});

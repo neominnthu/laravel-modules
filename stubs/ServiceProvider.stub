@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\DummyName\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+/**
+ * Service provider for the DummyName module.
+ */
+class DummyNameServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Bind services here.
+    }
+
+    public function boot(): void
+    {
+        $modulePath = __DIR__ . '/..';
+        $this->loadRoutesFrom($modulePath . '/Routes/web.php');
+        if (file_exists($modulePath . '/Routes/api.php')) {
+            $this->loadRoutesFrom($modulePath . '/Routes/api.php');
+        }
+        $this->loadViewsFrom($modulePath . '/Resources/views', 'dummyname');
+        $this->loadMigrationsFrom($modulePath . '/Database/Migrations');
+        $this->mergeConfigFrom($modulePath . '/Config/config.php', 'dummyname');
+    }
+}

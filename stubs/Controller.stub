@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\DummyName\Http\Controllers;
+
+use Illuminate\Routing\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+
+class DummyNameController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        return response('DummyName index');
+    }
+}
