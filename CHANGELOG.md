@@ -17,14 +17,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Eager + lazy tests for middleware alias & event listener parity
 - ModuleManager::enabledModules() convenience method
 - Verbose flag for module:list showing dependencies & lazy/eager mode
+- Community & governance docs: CODE_OF_CONDUCT.md, SECURITY.md, updated CONTRIBUTING.md
+- Added docs/ scaffold README & composer funding/support metadata
+- Static analysis baseline (phpstan + larastan) & composer analyse script
+- Dedicated exception class `ModuleManifestException` for manifest errors
+- `module:cache` command for explicit cache building
+- GitHub Actions CI workflow for tests, static analysis, and code style
 
 ### Changed (Unreleased)
 
 - Documentation: added lazy auto-registration section, middleware generator usage details, verbose list command
+- README: document `module:cache` command and CI workflow
 
 ### Fixed (Unreleased)
 
 - (placeholder)
+
+## [1.0.0] - 2025-08-29
+
+### Features
+
+- Modular architecture for Laravel 12
+- Module discovery, enable/disable, registry, and manifest management
+- Lazy/eager provider registration with parity for middleware/events
+- Generators: module, controller, model (+migration), event, listener, migration, seeder, factory, test, middleware
+- Dependency validation, cycle detection, and graph visualization (table, JSON, DOT)
+- Helper functions and facade for DX
+- Module cache build/clear commands
+- Dedicated exception class for manifest errors
+- CI workflow (tests, static analysis, code style)
+- Comprehensive documentation and meta files
+- Full test suite for core, helpers, error scenarios, and commands
+
+### Documentation
+
+- README and docs updated for all features, commands, and CI
+
+### Security
+
+- Manifest validation and strict dependency enforcement
 
 ## [0.2.0] - 2025-08-29
 
@@ -65,6 +96,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - README expanded with usage, configuration, roadmap
 
-### Security
+#### Security (legacy)
 
 - None

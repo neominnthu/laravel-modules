@@ -8,6 +8,8 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Filesystem\Filesystem;
 use InvalidArgumentException;
 
+class ModuleManifestException extends \RuntimeException {}
+
 /**
  * Represents a single module's manifest (module.json) file.
  */
@@ -32,12 +34,12 @@ class ModuleManifest implements Arrayable
     {
         $path = $this->path();
         if (! $this->files->exists($path)) {
-            throw new InvalidArgumentException("Module manifest not found at {$path}");
+            throw new ModuleManifestException("Module manifest not found at {$path}");
         }
         $json = $this->files->get($path);
         $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($decoded)) {
-            throw new InvalidArgumentException('Invalid module manifest structure.');
+            throw new ModuleManifestException('Invalid module manifest structure.');
         }
         $this->data = $decoded;
     }

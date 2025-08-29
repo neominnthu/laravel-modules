@@ -89,7 +89,17 @@ Rebuild module cache after structural changes:
 php artisan module:cache:clear
 ```
 
+Build the cache file explicitly:
+
+```bash
+php artisan module:cache
+```
+
 The cache file is stored at `bootstrap/cache/modules.php` and is safe to commit ignore.
+
+## Continuous Integration
+
+This package includes a GitHub Actions CI workflow that runs static analysis, tests, and code style checks on every push and pull request to `main`.
 
 ## Lazy Loading
 
@@ -207,6 +217,7 @@ Recommended: keep `strict_dependencies` enabled in production for safety.
 | module:list --verbose | List modules with dependencies & registration mode |
 | module:enable Name / module:disable Name | Toggle module state |
 | module:cache:clear | Rebuild module cache file |
+| module:cache | Build the cache file explicitly |
 | module:make:controller Module Name | Generate controller inside module |
 | module:make:model Module Name -m | Generate model (and optional migration) |
 | module:make:event Module EventName | Generate event class |
@@ -273,4 +284,8 @@ These global helpers are available once the package is loaded:
 
 ## License
 
-MIT
+MIT. See `LICENSE`.
+
+## Contributing & Community
+
+See `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md` for guidelines, conduct standards, and vulnerability reporting.

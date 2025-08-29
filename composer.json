@@ -25,6 +25,13 @@
       "providers": [
         "Modules\\ModulesServiceProvider"
       ]
+    },
+    "funding": [
+      {"type": "github", "url": "https://github.com/sponsors/yourname"}
+    ],
+    "support": {
+      "issues": "https://github.com/yourname/laravel-modules/issues",
+      "source": "https://github.com/yourname/laravel-modules"
     }
   },
   "autoload-dev": {
@@ -34,13 +41,16 @@
   },
   "scripts": {
     "test": "vendor/bin/pest",
-    "format": "vendor/bin/pint"
+  "format": "vendor/bin/pint",
+  "analyse": "vendor/bin/phpstan analyse"
   },
   "require-dev": {
     "orchestra/testbench": "^9.0",
     "pestphp/pest": "^3.0",
     "pestphp/pest-plugin-laravel": "^3.0",
-    "laravel/pint": "^1.16"
+  "laravel/pint": "^1.16",
+  "phpstan/phpstan": "^1.11",
+  "nunomaduro/larastan": "^2.9"
   },
   "minimum-stability": "stable",
   "prefer-stable": true

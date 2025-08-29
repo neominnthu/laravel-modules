@@ -5,33 +5,49 @@ namespace Modules\Console;
 
 use Illuminate\Console\Command;
 use Modules\Support\ModuleManager;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ListModulesCommand extends Command
 {
-    protected $signature = 'module:list {--verbose : Show dependencies when enabled}';
+    protected $signature = 'module:list {--verbose : Show dependencies when enabled} {--json : Output as JSON}';
     protected $description = 'List modules and status';
 
     public function handle(ModuleManager $manager): int
     {
-        $rows = [];
-        $headers = ['Module','Status','Version'];
+        $io = new SymfonyStyle($this->input, $this->output);
         $showVerbose = (bool) $this->option('verbose');
-        if ($showVerbose) {
-            $headers[] = 'Dependencies';
-        }
+        $asJson = (bool) $this->option('json');
         $all = $manager->discover();
+        $modules = [];
         foreach ($all as $name => $path) {
             $status = $manager->enabled($name);
             $version = $manager->version($name) ?? 'n/a';
-            $row = [$name, $status ? 'ENABLED' : 'DISABLED', $version];
+            $deps = [];
+            try { $deps = (new \Modules\Support\ModuleManifest($path))->dependencies(); } catch (\Throwable) {}
+            $modules[] = [
+                'name' => $name,
+                'status' => $status ? 'ENABLED' : 'DISABLED',
+                'version' => $version,
+                'dependencies' => $deps,
+            ];
+        }
+        if ($asJson) {
+            $io->writeln(json_encode($modules, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            return 0;
+        }
+        $headers = ['Module','Status','Version'];
+        if ($showVerbose) {
+            $headers[] = 'Dependencies';
+        }
+        $rows = [];
+        foreach ($modules as $mod) {
+            $row = [$mod['name'], $mod['status'], $mod['version']];
             if ($showVerbose) {
-                $deps = [];
-                try { $deps = (new \Modules\Support\ModuleManifest($path))->dependencies(); } catch (\Throwable) {}
-                $row[] = implode(',', $deps) ?: '-';
+                $row[] = implode(',', $mod['dependencies']) ?: '-';
             }
             $rows[] = $row;
         }
-        $this->table($headers, $rows);
-        return self::SUCCESS;
+        $io->table($headers, $rows);
+        return 0;
     }
 }
