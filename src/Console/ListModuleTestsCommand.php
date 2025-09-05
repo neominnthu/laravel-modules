@@ -13,9 +13,10 @@ class ListModuleTestsCommand extends Command
     protected $signature = 'module:test:list {module : Module name}';
     protected $description = 'List all Pest test files in a module.';
 
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
-    $io = new SymfonyStyle($this->input, $this->output);
+        $manager = $this->laravel->make(ModuleManager::class);
+        $io = new SymfonyStyle($this->input, $this->output);
         $module = $this->argument('module');
         $path = $manager->path($module);
         if (! $path) {

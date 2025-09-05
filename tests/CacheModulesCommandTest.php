@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 use Modules\Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
-use function Pest\uses;
-use function Pest\it;
-use function Pest\expect;
-use function base_path;
 
 uses(TestCase::class);
 
 it('builds module cache file with module:cache command', function () {
-    $cacheFile = base_path('bootstrap/cache/modules.php');
+    $cacheFile = app()->basePath('bootstrap/cache/modules.php');
     if (file_exists($cacheFile)) {
         unlink($cacheFile);
     }

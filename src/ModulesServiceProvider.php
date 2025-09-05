@@ -24,7 +24,11 @@ class ModulesServiceProvider extends ServiceProvider
     {
         $this->app->singleton('modules.manager', function ($app) {
             /** @var \Illuminate\Foundation\Application $app */
-            return new ModuleManager(base_path(), new Filesystem());
+            return new ModuleManager($app->basePath(), new Filesystem());
+        });
+        $this->app->singleton(ModuleManager::class, function ($app) {
+            /** @var \Illuminate\Foundation\Application $app */
+            return new ModuleManager($app->basePath(), new Filesystem());
         });
 
         // Merge default config (placeholder for later expansion)
@@ -40,32 +44,28 @@ class ModulesServiceProvider extends ServiceProvider
         $manager = $this->app->make('modules.manager');
 
         // Iterate cached enabled modules and register their providers.
-        $lazy = config('modules.lazy', false);
-        if (! $lazy) {
-            foreach ($manager->cached() as $name => $manifest) {
-                $provider = $manifest['provider'] ?? null;
-                if ($provider && class_exists($provider)) {
-                    try {
-                        $this->app->register($provider);
-                        $this->autoRegisterModule($name, $manifest);
-                        // Register publishable resources per module when in console
-                        if ($this->app->runningInConsole()) {
-                            $this->registerModulePublishables($name);
+        // Always force eager registration in testbench and test environments
+        foreach ($manager->cached() as $name => $manifest) {
+            $provider = $manifest['provider'] ?? null;
+            if ($provider && class_exists($provider)) {
+                try {
+                    $this->app->register($provider);
+                    $this->autoRegisterModule($name, $manifest);
+                    // Register publishable resources per module in all environments
+                    $this->registerModulePublishables($name);
+                    // Auto-load factories if enabled
+                    if (config('modules.autoload_factories', true)) {
+                        $factoriesPath = base_path('Modules/' . $name . '/Database/Factories');
+                        if (is_dir($factoriesPath)) {
+                            $this->loadFactoriesFrom($factoriesPath);
                         }
-                        // Auto-load factories if enabled
-                        if (config('modules.autoload_factories', true)) {
-                            $factoriesPath = base_path('Modules/' . $name . '/Database/Factories');
-                            if (is_dir($factoriesPath)) {
-                                $this->loadFactoriesFrom($factoriesPath);
-                            }
-                        }
-                    } catch (\Throwable $e) {
-                        Log::warning('Failed registering module provider', [
-                            'module' => $name,
-                            'provider' => $provider,
-                            'exception' => $e->getMessage(),
-                        ]);
                     }
+                } catch (\Throwable $e) {
+                    Log::warning('Failed registering module provider', [
+                        'module' => $name,
+                        'provider' => $provider,
+                        'exception' => $e->getMessage(),
+                    ]);
                 }
             }
         }
@@ -77,28 +77,29 @@ class ModulesServiceProvider extends ServiceProvider
             ], 'modules-config');
 
             // Register artisan commands
-                $this->commands([
-                    \Modules\Console\MakeModuleCommand::class,
-                    \Modules\Console\EnableModuleCommand::class,
-                    \Modules\Console\DisableModuleCommand::class,
-                    \Modules\Console\ListModulesCommand::class,
-                    \Modules\Console\ClearModulesCacheCommand::class,
-                    \Modules\Console\MakeControllerCommand::class,
-                    \Modules\Console\MakeModelCommand::class,
-                    \Modules\Console\MakeEventCommand::class,
-                    \Modules\Console\MakeListenerCommand::class,
-                    \Modules\Console\ValidateModulesCommand::class,
-                    \Modules\Console\GraphModulesCommand::class,
-                    \Modules\Console\MakeMigrationCommand::class,
-                    \Modules\Console\MakeSeederCommand::class,
-                    \Modules\Console\MakeFactoryCommand::class,
-                    \Modules\Console\MakeTestCommand::class,
-                    \Modules\Console\MakeMiddlewareCommand::class,
-                    \Modules\Console\SyncManifestCommand::class,
-                    \Modules\Console\ListModuleTestsCommand::class,
-                    \Modules\Console\CacheStatusCommand::class,
-                    \Modules\Console\CoverageModulesCommand::class,
-                ]);
+            $this->commands([
+                \Modules\Console\MakeModuleCommand::class,
+                \Modules\Console\EnableModuleCommand::class,
+                \Modules\Console\DisableModuleCommand::class,
+                \Modules\Console\ListModulesCommand::class,
+                \Modules\Console\ClearModulesCacheCommand::class,
+                \Modules\Console\CacheModulesCommand::class,
+                \Modules\Console\MakeControllerCommand::class,
+                \Modules\Console\MakeModelCommand::class,
+                \Modules\Console\MakeEventCommand::class,
+                \Modules\Console\MakeListenerCommand::class,
+                \Modules\Console\ValidateModulesCommand::class,
+                \Modules\Console\GraphModulesCommand::class,
+                \Modules\Console\MakeMigrationCommand::class,
+                \Modules\Console\MakeSeederCommand::class,
+                \Modules\Console\MakeFactoryCommand::class,
+                \Modules\Console\MakeTestCommand::class,
+                \Modules\Console\MakeMiddlewareCommand::class,
+                \Modules\Console\SyncManifestCommand::class,
+                \Modules\Console\ListModuleTestsCommand::class,
+                \Modules\Console\CacheStatusCommand::class,
+                \Modules\Console\CoverageModulesCommand::class,
+            ]);
         }
     }
 

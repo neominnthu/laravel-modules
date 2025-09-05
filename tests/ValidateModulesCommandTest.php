@@ -4,18 +4,13 @@ declare(strict_types=1);
 
 use Modules\Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
-use function Pest\uses;
-use function Pest\it;
-use function Pest\expect;
-use function base_path;
-use function config;
 
 uses(TestCase::class);
 
 it('detects dependency cycles in module:validate', function () {
     // Simulate cycle: Blog depends on Shop, Shop depends on Blog
-    $blogManifest = base_path('Modules/Blog/module.json');
-    $shopManifest = base_path('Modules/Shop/module.json');
+    $blogManifest = app()->basePath('Modules/Blog/module.json');
+    $shopManifest = app()->basePath('Modules/Shop/module.json');
     $blog = json_decode(file_get_contents($blogManifest), true);
     $shop = json_decode(file_get_contents($shopManifest), true);
     $blog['dependencies'] = ['Shop'];
@@ -38,13 +33,23 @@ it('detects dependency cycles in module:validate', function () {
 });
 
 it('reports manifest errors with ModuleManifestException', function () {
-    $blogManifest = base_path('Modules/Blog/module.json');
+    $blogManifest = app()->basePath('Modules/Blog/module.json');
+    $sandboxManifest = app()->basePath('vendor/orchestra/testbench-core/laravel/Modules/Blog/module.json');
     $backup = file_get_contents($blogManifest);
-    file_put_contents($blogManifest, '{invalid json');
-    $result = Artisan::call('module:validate');
-    $output = Artisan::output();
-    expect($result)->toBe(1);
-    expect($output)->toContain('invalid manifest');
-    // Restore
-    file_put_contents($blogManifest, $backup);
+    $sandboxBackup = file_exists($sandboxManifest) ? file_get_contents($sandboxManifest) : null;
+    try {
+        file_put_contents($blogManifest, '{invalid json');
+        if ($sandboxBackup !== null) {
+            file_put_contents($sandboxManifest, '{invalid json');
+        }
+        $result = Artisan::call('module:validate');
+        $output = Artisan::output();
+        expect($result)->toBe(1);
+        expect($output)->toContain('invalid manifest');
+    } finally {
+        file_put_contents($blogManifest, $backup);
+        if ($sandboxBackup !== null) {
+            file_put_contents($sandboxManifest, $sandboxBackup);
+        }
+    }
 });

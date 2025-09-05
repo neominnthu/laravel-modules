@@ -20,11 +20,11 @@ class MakeModuleCommand extends Command
      * Execute the module scaffolding command.
      *
      * @param Filesystem $files Filesystem instance.
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (SUCCESS/FAILURE).
      */
-    public function handle(Filesystem $files, ModuleManager $manager): int
+    public function handle(Filesystem $files): int
     {
+        $manager = $this->laravel->make(ModuleManager::class);
         $name = Str::studly($this->argument('name'));
         $base = $manager->modulesRoot() . DIRECTORY_SEPARATOR . $name;
         if ($files->exists($base)) {

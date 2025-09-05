@@ -21,12 +21,12 @@ class ValidateModulesCommand extends Command
     /**
      * Execute the validation command.
      *
-     * @param ModuleManager $manager The module manager instance.
      * @return int Exit code (0 = success, 1 = issues found).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
-    $io = new SymfonyStyle($this->input, $this->output);
+        $manager = $this->laravel->make(ModuleManager::class);
+        $io = new SymfonyStyle($this->input, $this->output);
         $issues = [];
         $all = $manager->discover();
         $graph = [];

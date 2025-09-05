@@ -21,12 +21,12 @@ class SyncManifestCommand extends Command
     /**
      * Execute the manifest sync command.
      *
-     * @param ModuleManager $manager The module manager instance.
      * @return int Exit code (0 = success).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
-    $io = new SymfonyStyle($this->input, $this->output);
+        $manager = $this->laravel->make(ModuleManager::class);
+        $io = new SymfonyStyle($this->input, $this->output);
         $all = $manager->discover();
         $issues = [];
         $fixed = [];

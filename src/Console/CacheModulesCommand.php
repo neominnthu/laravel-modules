@@ -19,11 +19,11 @@ class CacheModulesCommand extends Command
     /**
      * Execute the cache build command.
      *
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (0 = success).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
+        $manager = $this->laravel->make(\Modules\Support\ModuleManager::class);
         $io = new SymfonyStyle($this->input, $this->output);
         $data = $manager->buildCache();
         $count = count($data);

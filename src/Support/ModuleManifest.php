@@ -58,8 +58,14 @@ class ModuleManifest implements Arrayable
             throw new ModuleManifestException("Module manifest not found at {$path}");
         }
         $json = $this->files->get($path);
-        $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            error_log("[MANIFEST ERROR] Path: $path\nContents: $json\nException: " . $e->getMessage());
+            throw $e;
+        }
         if (! is_array($decoded)) {
+            error_log("[MANIFEST ERROR] Invalid structure at $path\nContents: $json");
             throw new ModuleManifestException('Invalid module manifest structure.');
         }
         $this->data = $decoded;

@@ -11,8 +11,9 @@ class ClearModulesCacheCommand extends Command
     protected $signature = 'module:cache:clear';
     protected $description = 'Clear module cache file and rebuild';
 
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
+        $manager = $this->laravel->make(ModuleManager::class);
         $manager->forgetCache();
         $manager->buildCache();
         $this->info('Module cache rebuilt.');

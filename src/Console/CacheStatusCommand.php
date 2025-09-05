@@ -19,12 +19,12 @@ class CacheStatusCommand extends Command
     /**
      * Execute the cache status command.
      *
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (0 = success).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
-    $io = new SymfonyStyle($this->input, $this->output);
+        $manager = $this->laravel->make(ModuleManager::class);
+        $io = new SymfonyStyle($this->input, $this->output);
         $cacheFile = base_path(ModuleManager::CACHE_FILE);
         if (!file_exists($cacheFile)) {
             $io->warning('Module cache file not found.');

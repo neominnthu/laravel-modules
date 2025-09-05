@@ -31,11 +31,23 @@ class BlogServiceProvider extends ServiceProvider
 
     // Fire a simple event for tests to assert listener auto-registration in eager mode.
     event(new Pinged('boot'));
+            // Explicitly register middleware and listener for testbench isolation
+            $router = $this->app['router'];
+            $router->aliasMiddleware('blogsample', \Modules\Blog\Http\Middleware\BlogSampleMiddleware::class);
+            $this->app['events']->listen(
+                \Modules\Blog\Events\Pinged::class,
+                \Modules\Blog\Listeners\RecordPing::class
+            );
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 $base . '/Config/config.php' => config_path('blog.php'),
-            ], 'blog-config');
+                $base . '/Resources/views' => resource_path('views/vendor/blog'),
+            ], 'module-blog');
+            $this->publishes([
+                $base . '/Config/config.php' => config_path('blog.php'),
+                $base . '/Resources/views' => resource_path('views/vendor/blog'),
+            ], 'modules-resources');
         }
     }
 

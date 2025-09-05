@@ -17,13 +17,13 @@ class EnableModuleCommand extends Command
     /**
      * Execute the enable module command.
      *
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (SUCCESS).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
+        $manager = $this->laravel->make(ModuleManager::class);
         $name = $this->argument('name');
-        $manager->enable($name);
+        $result = $manager->enable($name);
         $manager->buildCache();
         $this->info("Module [$name] enabled.");
         return self::SUCCESS;

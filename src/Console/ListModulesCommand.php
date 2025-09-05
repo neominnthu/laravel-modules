@@ -18,11 +18,11 @@ class ListModulesCommand extends Command
     /**
      * Execute the module listing command.
      *
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (0 = success).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
+        $manager = $this->laravel->make(ModuleManager::class);
         $io = new SymfonyStyle($this->input, $this->output);
         $showVerbose = (bool) $this->option('verbose');
         $asJson = (bool) $this->option('json');

@@ -17,11 +17,11 @@ class DisableModuleCommand extends Command
     /**
      * Execute the disable module command.
      *
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (SUCCESS).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
+        $manager = $this->laravel->make(ModuleManager::class);
         $name = $this->argument('name');
         $manager->disable($name);
         $manager->buildCache();

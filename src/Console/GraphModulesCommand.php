@@ -18,11 +18,11 @@ class GraphModulesCommand extends Command
     /**
      * Execute the graph command to display module dependencies.
      *
-     * @param ModuleManager $manager Module manager instance.
      * @return int Exit code (SUCCESS).
      */
-    public function handle(ModuleManager $manager): int
+    public function handle(): int
     {
+        $manager = $this->laravel->make(ModuleManager::class);
         $modules = $manager->discover();
         $rows = [];
         $graph = [];
