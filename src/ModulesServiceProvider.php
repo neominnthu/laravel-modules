@@ -123,6 +123,7 @@ class ModulesServiceProvider extends ServiceProvider
                 \Modules\Console\ShowModuleVersionCommand::class,
                 \Modules\Console\PublishConfigCommand::class,
                 \Modules\Console\VerifyManifestsCommand::class,
+                \Modules\Console\HealthCheckCommand::class,
             ]);
         }
     }
