@@ -49,7 +49,22 @@ class ModulesServiceProvider extends ServiceProvider
             $provider = $manifest['provider'] ?? null;
             if ($provider && class_exists($provider)) {
                 try {
-                    $this->app->register($provider);
+                    $instance = $this->app->register($provider);
+                    // Track provider registration & store instance
+                    if (method_exists($manager, 'markProviderRegistered')) {
+                        $manager->markProviderRegistered($provider);
+                    }
+                    if (is_object($instance) && method_exists($manager, 'storeProviderInstance')) {
+                        $manager->storeProviderInstance($provider, $instance);
+                    } elseif (method_exists($manager, 'storeProviderInstance')) {
+                        // Resolve via container if register returned void
+                        if ($this->app->bound($provider)) {
+                            $resolved = $this->app->make($provider);
+                            if (is_object($resolved)) {
+                                $manager->storeProviderInstance($provider, $resolved);
+                            }
+                        }
+                    }
                     $this->autoRegisterModule($name, $manifest);
                     // Register publishable resources per module in all environments
                     $this->registerModulePublishables($name);
@@ -61,7 +76,9 @@ class ModulesServiceProvider extends ServiceProvider
                         }
                     }
                 } catch (\Throwable $e) {
-                    Log::warning('Failed registering module provider', [
+                    $channel = config('modules.log_channel', 'stack');
+                    $logger = method_exists(Log::class, 'channel') ? Log::channel($channel) : Log::getFacadeRoot();
+                    $logger->warning('Failed registering module provider', [
                         'module' => $name,
                         'provider' => $provider,
                         'exception' => $e->getMessage(),
@@ -99,6 +116,13 @@ class ModulesServiceProvider extends ServiceProvider
                 \Modules\Console\ListModuleTestsCommand::class,
                 \Modules\Console\CacheStatusCommand::class,
                 \Modules\Console\CoverageModulesCommand::class,
+                \Modules\Console\DoctorModulesCommand::class,
+                \Modules\Console\BumpModuleVersionCommand::class,
+                \Modules\Console\StatusModulesCommand::class,
+                \Modules\Console\SyncModulesCommand::class,
+                \Modules\Console\ShowModuleVersionCommand::class,
+                \Modules\Console\PublishConfigCommand::class,
+                \Modules\Console\VerifyManifestsCommand::class,
             ]);
         }
     }

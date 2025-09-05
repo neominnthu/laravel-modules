@@ -18,6 +18,10 @@ class ListModuleTestsCommand extends Command
         $manager = $this->laravel->make(ModuleManager::class);
         $io = new SymfonyStyle($this->input, $this->output);
         $module = $this->argument('module');
+        if (!ModuleManager::validateModuleName($module)) {
+            $io->error("Invalid module name: [{$module}]");
+            return 1;
+        }
         $path = $manager->path($module);
         if (! $path) {
             $io->error('Module not found.');

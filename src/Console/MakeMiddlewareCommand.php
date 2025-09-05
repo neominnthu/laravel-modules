@@ -27,6 +27,10 @@ class MakeMiddlewareCommand extends Command
     {
         $module = Str::studly($this->argument('module'));
         $name = Str::studly($this->argument('name'));
+        if (!ModuleManager::validateModuleName($module)) {
+            $this->error("Invalid module name: [{$module}]");
+            return self::FAILURE;
+        }
         if (! Str::endsWith($name, 'Middleware')) {
             $name .= 'Middleware';
         }

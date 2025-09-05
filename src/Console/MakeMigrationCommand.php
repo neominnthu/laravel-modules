@@ -27,6 +27,10 @@ class MakeMigrationCommand extends Command
     {
         $module = Str::studly($this->argument('module'));
         $name = Str::snake($this->argument('name'));
+        if (!ModuleManager::validateModuleName($module)) {
+            $this->error("Invalid module name: [{$module}]");
+            return self::FAILURE;
+        }
         $modulePath = $manager->path($module);
         if (! $modulePath) {
             $this->error('Module not found.');

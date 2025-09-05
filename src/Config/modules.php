@@ -17,4 +17,7 @@ return [
 
     // If true, automatically load model factories from each enabled module's Database/Factories directory.
     'autoload_factories' => true,
+
+    // Logging channel used for module warnings (defaults to stack if channel missing)
+    'log_channel' => env('MODULES_LOG_CHANNEL', 'stack'),
 ];

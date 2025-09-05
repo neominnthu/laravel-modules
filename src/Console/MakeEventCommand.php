@@ -17,6 +17,10 @@ class MakeEventCommand extends Command
     {
         $module = Str::studly($this->argument('module'));
         $name = Str::studly($this->argument('name'));
+        if (!ModuleManager::validateModuleName($module)) {
+            $this->error("Invalid module name: [{$module}]");
+            return self::FAILURE;
+        }
         $path = $manager->path($module);
         if (! $path) {
             $this->error('Module not found.');

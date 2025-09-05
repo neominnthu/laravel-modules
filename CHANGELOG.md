@@ -5,24 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [1.1.0] - 2025-09-05
+
+### Added
+
+- `module:status` command for summary of enabled/disabled modules (table/JSON)
+- `module:sync` command to reconcile registry with filesystem (add/prune modules)
+- `module:doctor` extended with `--fix` (auto cache rebuild) and `--sync` (registry sync), plus `--enable-new` and `--prune-missing` options
+- Dependency chain/cycle/missing path reporting in doctor diagnostics
+- Version constraint validation in doctor diagnostics (with actionable output and exit code)
+- `module:version:show` command for listing module versions (table/JSON)
+- Registry mutation API (`addToRegistry`, `pruneFromRegistry`) for safe programmatic registry changes
+
 ### Changed
 
-- Documentation: added lazy auto-registration section, middleware generator usage details, verbose list command
-- README: document `module:cache` command and CI workflow
-- All console commands and support classes now have complete PHPDoc blocks and code style polish
+- README updated for new commands, diagnostics, and version constraint features
+- Doctor command now returns exit code 1 for version constraint failures
 
 ### Fixed
 
-- Static analysis errors resolved (type hints, generics, instantiation)
-- Composer.json and phpstan.neon.dist updated for Laravel 12 compatibility
+- Reflection removed from sync command (uses new registry API)
+- Improved diagnostics output for dependency chains and version constraints
 
-### CI Validation
+### Documentation
 
-- CI workflow validated: runs static analysis, tests, and code style on every push and PR
-
-### Release Prep
-
-- Ready for production release: all code, docs, and tests are polished and validated
+- README and docs updated for all new features, commands, and diagnostics
 
 ## [1.0.0] - 2025-08-29
 

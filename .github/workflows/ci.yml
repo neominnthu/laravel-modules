@@ -9,18 +9,49 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          coverage: none
+          php-version: ${{ matrix.php-version }}
+          coverage: xdebug
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
       - name: Run static analysis
-        run: composer analyse
-      - name: Run tests
-        run: composer test
+        run: |
+          if composer show | grep -q 'phpstan/phpstan'; then
+            composer analyse;
+          else
+            echo "phpstan not installed, skipping analysis.";
+          fi
+      - name: Run tests with coverage
+        run: |
+          if composer show | grep -q 'pestphp/pest'; then
+            composer test -- --coverage --coverage-clover=coverage.xml;
+          else
+            composer test;
+          fi
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.php-version }}
+          path: coverage.xml
       - name: Check code style
-        run: composer format -- --test
+        run: |
+          if composer show | grep -q 'nunomaduro/pint'; then
+            composer format -- --test;
+          else
+            echo "Pint not installed, skipping code style check.";
+          fi

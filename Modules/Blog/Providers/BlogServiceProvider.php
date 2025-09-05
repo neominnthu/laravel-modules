@@ -29,15 +29,22 @@ class BlogServiceProvider extends ServiceProvider
         $this->loadViewsFrom($base . '/Resources/views', 'blog');
         $this->loadMigrationsFrom($base . '/Database/Migrations');
 
-    // Fire a simple event for tests to assert listener auto-registration in eager mode.
-    event(new Pinged('boot'));
-            // Explicitly register middleware and listener for testbench isolation
-            $router = $this->app['router'];
-            $router->aliasMiddleware('blogsample', \Modules\Blog\Http\Middleware\BlogSampleMiddleware::class);
-            $this->app['events']->listen(
-                \Modules\Blog\Events\Pinged::class,
-                \Modules\Blog\Listeners\RecordPing::class
-            );
+        // Fire a simple event for tests to assert listener auto-registration in eager mode.
+        event(new Pinged('boot'));
+        // Explicitly register middleware and listener for testbench isolation
+        $router = $this->app['router'];
+        $router->aliasMiddleware('blogsample', \Modules\Blog\Http\Middleware\BlogSampleMiddleware::class);
+        $this->app['events']->listen(
+            \Modules\Blog\Events\Pinged::class,
+            \Modules\Blog\Listeners\RecordPing::class
+        );
+        // Record provider in manager if available (idempotent)
+        if ($this->app->bound('modules.manager')) {
+            $manager = $this->app->make('modules.manager');
+            if (method_exists($manager, 'markProviderRegistered')) {
+                $manager->markProviderRegistered(static::class);
+            }
+        }
 
         if ($this->app->runningInConsole()) {
             $this->publishes([

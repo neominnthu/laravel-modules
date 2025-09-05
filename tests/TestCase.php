@@ -8,9 +8,26 @@ use Modules\ModulesServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
+    /**
+     * Determine if tests should run in quiet mode (suppress RESTORE / DEBUG noise).
+     */
+    protected function isQuiet(): bool
+    {
+        $val = strtolower((string) getenv('QUIET_MODULE_TESTS'));
+        if ($val === '') {
+            // Also allow defining a constant for alternative triggering
+            if (defined('QUIET_MODULE_TESTS') && constant('QUIET_MODULE_TESTS') === true) {
+                return true;
+            }
+        }
+        return in_array($val, ['1','true','yes','on'], true);
+    }
 // removed extra brace
     protected function logManifestContents(): void
     {
+        if ($this->isQuiet()) {
+            return; // suppress debug output when quiet mode enabled
+        }
         $base = $this->app->basePath();
         $destModules = $base . DIRECTORY_SEPARATOR . 'Modules';
         foreach (["Blog", "Shop"] as $mod) {
@@ -34,7 +51,9 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         $this->restoreModuleManifests();
-        $this->logManifestContents();
+    if (! $this->isQuiet()) {
+            $this->logManifestContents();
+        }
     }
 
     protected function tearDown(): void
@@ -47,34 +66,81 @@ abstract class TestCase extends BaseTestCase
     protected function restoreModuleManifests(): void
     {
         if (!isset($this->app)) return;
-        $paths = [];
-        // Workspace Modules path
+        static $inProgress = false;
+        if ($inProgress) return; // guard against recursive calls
+        $inProgress = true;
+    $quiet = $this->isQuiet();
         $base = $this->app->basePath();
+        $paths = [];
         $paths[] = $base . DIRECTORY_SEPARATOR . 'Modules';
-        // Testbench sandbox Modules path
-        $vendorTestbench = $base . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel' . DIRECTORY_SEPARATOR . 'Modules';
-        $paths[] = $vendorTestbench;
-        foreach ($paths as $destModules) {
-            foreach ([
-                'Blog' => '{"name":"Blog","version":"1.2.0","provider":"Modules\\Blog\\Providers\\BlogServiceProvider"}',
-                'Shop' => '{"name":"Shop","version":"1.1.0","provider":"Modules\\Shop\\Providers\\ShopServiceProvider","dependencies":["Blog"],"dependency_versions":{"Blog":">=1.1.0"}}'
-            ] as $mod => $manifest) {
+        // Only add vendor sandbox path if current base is not already inside it
+        if (! $this->isQuiet() && ! str_contains($base, 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel')) {
+            $paths[] = $base . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel' . DIRECTORY_SEPARATOR . 'Modules';
+        }
+
+        $definitions = [
+            'Blog' => [
+                'name' => 'Blog',
+                'version' => '1.1.0',
+                'provider' => 'Modules\\Blog\\Providers\\BlogServiceProvider',
+            ],
+            'Shop' => [
+                'name' => 'Shop',
+                'version' => '1.1.0',
+                'provider' => 'Modules\\Shop\\Providers\\ShopServiceProvider',
+                'dependencies' => ['Blog'],
+                'dependency_versions' => ['Blog' => '>=1.1.0'],
+            ],
+        ];
+
+        foreach (array_unique($paths) as $destModules) {
+            foreach ($definitions as $mod => $data) {
                 $modDir = $destModules . DIRECTORY_SEPARATOR . $mod;
                 $manifestPath = $modDir . DIRECTORY_SEPARATOR . 'module.json';
                 if (!is_dir($modDir)) {
-                    fwrite(STDERR, "[RESTORE] Directory missing: $modDir\n");
+                    if (! $quiet) fwrite(STDERR, "[RESTORE] Directory missing: $modDir\n");
                     continue;
                 }
-                // Write with Unix line endings and no BOM
-                $cleanManifest = str_replace(["\r\n", "\r"], "\n", $manifest);
-                $result = @file_put_contents($manifestPath, $cleanManifest);
-                if ($result === false) {
-                    fwrite(STDERR, "[RESTORE] Failed to write manifest: $manifestPath\n");
-                } else {
-                    fwrite(STDERR, "[RESTORE] Manifest written: $manifestPath\n");
+                $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                if ($json === false) {
+                    if (! $quiet) fwrite(STDERR, "[RESTORE] Failed to encode manifest for $mod\n");
+                    continue;
                 }
+                $json = str_replace(["\r\n", "\r"], "\n", $json);
+                $temp = $manifestPath . '.tmp';
+                $bytes = @file_put_contents($temp, $json, LOCK_EX);
+                if ($bytes === false) {
+                    if (! $quiet) fwrite(STDERR, "[RESTORE] Failed to write manifest: $manifestPath\n");
+                    continue;
+                }
+                @rename($temp, $manifestPath);
+                if (! $quiet) fwrite(STDERR, "[RESTORE] Manifest written: $manifestPath ($bytes bytes)\n");
             }
         }
+        // Also restore the modules enable/disable registry (modules.json) to ensure isolation across tests
+        $registryPath = $base . DIRECTORY_SEPARATOR . 'modules.json';
+        $registryData = json_encode(['Blog' => true, 'Shop' => false]);
+        if ($registryData !== false) {
+            $tmpReg = $registryPath . '.tmp';
+            if (@file_put_contents($tmpReg, $registryData, LOCK_EX) !== false) {
+                @rename($tmpReg, $registryPath);
+                if (! $quiet) fwrite(STDERR, "[RESTORE] Registry written: $registryPath\n");
+                // Refresh manager singleton registry if available
+                try {
+                    if (isset($this->app) && $this->app->bound('modules.manager')) {
+                        $manager = $this->app->make('modules.manager');
+                        if (method_exists($manager, 'reloadRegistry')) {
+                            $manager->reloadRegistry();
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    if (! $quiet) fwrite(STDERR, "[RESTORE] Registry reload failed: {$e->getMessage()}\n");
+                }
+            } else {
+                    if (! $quiet) fwrite(STDERR, "[RESTORE] Failed writing registry: $registryPath\n");
+            }
+        }
+        $inProgress = false;
     }
 
     protected function defineConsoleKernel($app)

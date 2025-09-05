@@ -12,18 +12,22 @@ A professional modular system for Laravel 12 applications. Create, enable, disab
 
 
 
+
 ## Features
 
 - **Module scaffolding**: Quickly create new modules with all necessary structure using `php artisan module:make Blog --api`.
 - **Auto discovery & lazy provider registration**: Modules are discovered automatically and can be registered lazily for performance.
 - **Enable / disable modules**: Use `module:enable`, `module:disable`, and list with `module:list` to manage modules at runtime.
+- **Status and Sync**: Use `module:status` for a summary of enabled/disabled modules, and `module:sync` to reconcile registry with filesystem (add/prune modules).
 - **Resource loading**: Seamlessly load routes (web/api/console), views, migrations, and configs per module.
 - **Generators**: Artisan commands for controller, model (with migration), event, listener, migration, seeder, factory, test, middleware.
 - **Event & middleware auto-discovery**: Automatically register events and middleware defined in modules.
 - **Cached manifest**: Fast boot with manifest cache (`bootstrap/cache/modules.php`), supports lazy provider boot.
 - **Facade + helper**: Use `Module::call('Blog@method')` and `module_path('Blog')` for easy module interaction.
-- **Strict dependency validation**: Prevents loading modules with missing or disabled dependencies.
+- **Strict dependency validation**: Prevents loading modules with missing, disabled, or version-incompatible dependencies.
 - **Graph visualization**: Output module dependency graph in table, JSON, or DOT format.
+- **Diagnostics**: Use `module:doctor` for health checks, dependency chain/cycle/missing path reporting, and version constraint validation. Auto-fix cache issues with `--fix` and sync registry with `--sync`.
+- **Version commands**: Use `module:version:show` to list module versions, and `module:version:bump` to increment or set versions.
 - **Pest test ready**: Scaffold and run tests for modules using Pest and Testbench.
 
 ## Why Use This?
@@ -58,15 +62,21 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 This package is open-sourced software licensed under the [MIT license](LICENSE).
 
 
+
 ## Quick Start
 
 
 1. Publish config (optional):
 
 ```bash
-php artisan vendor:publish --tag=modules-config
+php artisan module:publish-config
 ```
 
+To overwrite an existing config file:
+
+```bash
+php artisan module:publish-config --force
+```
 
 2. Create a module:
 
@@ -74,23 +84,46 @@ php artisan vendor:publish --tag=modules-config
 php artisan module:make Blog --api
 ```
 
-
 3. List modules:
 
 ```bash
 php artisan module:list
 ```
 
+4. Show status summary:
 
-4. Disable / enable:
+```bash
+php artisan module:status
+```
+
+5. Sync registry with filesystem:
+
+```bash
+php artisan module:sync --enable-new --prune-missing
+```
+
+6. Disable / enable:
 
 ```bash
 php artisan module:disable Blog
 php artisan module:enable Blog
 ```
 
+7. Show module versions:
 
-5. Generate artifacts inside a module:
+```bash
+php artisan module:version:show
+php artisan module:version:show Blog --json
+```
+
+8. Bump module version:
+
+```bash
+php artisan module:version:bump Blog minor
+php artisan module:version:bump Blog 2.0.0
+```
+
+9. Generate artifacts inside a module:
 
 ```bash
 php artisan module:make:controller Blog Post
@@ -99,14 +132,23 @@ php artisan module:make:event Blog PostPublished
 php artisan module:make:listener Blog SendNotification --event=PostPublished
 ```
 
-6. Call a module provider method lazily:
+10. Run diagnostics and auto-fix:
+
+```bash
+php artisan module:doctor
+php artisan module:doctor --fix
+php artisan module:doctor --sync --enable-new --prune-missing
+```
+
+11. Call a module provider method lazily:
 
 ```php
 Module::call('Blog@someMethod');
-	```
+```
 
 
-## Module Version Constraints
+
+## Module Version Constraints & Diagnostics
 
 Each module can declare required versions for its dependencies in `module.json`:
 
@@ -119,6 +161,8 @@ Each module can declare required versions for its dependencies in `module.json`:
 	"dependency_versions": { "Blog": ">=1.0.0" }
 }
 ```
+
+Run `php artisan module:doctor` to check for missing, disabled, or version-incompatible dependencies. The output will show dependency chains, cycles, and version constraint failures, with actionable paths for debugging.
 
 When enabling or validating modules, the manager will check that all required dependency versions are satisfied. If a dependency does not meet the constraint, an error will be thrown.
 
@@ -368,6 +412,8 @@ This creates `Modules/Blog/Tests/ExampleTest.php` with a Pest test scaffold. The
 | module:make:factory Module Post --model=Post | Create a factory targeting a model |
 | module:make:test Module ExampleTest | Create a Pest test file inside module |
 | module:validate | Validate dependency integrity |
+| module:doctor | Diagnose module system health & mismatches |
+| module:version:bump Name {patch\|minor\|major\|X.Y.Z} | Bump or set module version |
 | module:graph | Show dependency graph (supports --json, --dot flags) |
 
 
@@ -391,6 +437,7 @@ php artisan vendor:publish --tag=module-blog
 ```
 
 This will publish:
+
 - Config: `Config/config.php` → `config/{name}.php`
 - Views: `Resources/views` → `resources/views/vendor/{name}`
 - Translations: `Resources/lang` → `resources/lang/vendor/{name}`
@@ -432,10 +479,6 @@ These global helpers are available once the package is loaded:
 | module_manifest(name) | Raw manifest array |
 | modules_manager() | Underlying ModuleManager instance |
 | modules_enabled() | Array of enabled module names |
-
-## License
-
-MIT. See `LICENSE`.
 
 ## Contributing & Community
 
