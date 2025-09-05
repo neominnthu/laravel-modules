@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\App;
 use InvalidArgumentException;
 
 /**
- * Central service responsible for discovering, caching and querying modules.
- */
-/**
  * Central service responsible for discovering, caching, and querying modules.
  * Handles registry, manifest, provider registration, dependency validation, and cache management.
  */
@@ -77,6 +74,9 @@ class ModuleManager
     /** @var array<string,array<string,mixed>> */
     protected array $manifests = [];
 
+    /** @var array<string,string>|null Cached discovery map */
+    protected ?array $discovered = null;
+
     /** @var array<string,bool> Providers already registered */
     protected array $registeredProviders = [];
 
@@ -126,12 +126,15 @@ class ModuleManager
      */
     public function discover(): array
     {
+        if ($this->discovered !== null) {
+            return $this->discovered;
+        }
         $modulesRoot = $this->modulesRoot();
         if (! $this->files->isDirectory($modulesRoot)) {
-            return [];
+            return $this->discovered = [];
         }
         $directories = collect($this->files->directories($modulesRoot));
-        return $directories->mapWithKeys(function (string $dir) {
+        return $this->discovered = $directories->mapWithKeys(function (string $dir) {
             $name = basename($dir);
             return [$name => $dir];
         })->all();
@@ -170,6 +173,7 @@ class ModuleManager
         $this->registry[$name] = true;
         $this->saveRegistry();
         $this->forgetCache();
+    $this->discovered = null; // force re-discovery if new module added externally
     }
 
     /**
@@ -309,7 +313,7 @@ class ModuleManager
         if ($this->files->exists($file)) {
             /** @var array<string,array<string,mixed>> $data */
             $data = include $file;
-        return $data;
+            return $data;
         }
         return $this->buildCache();
     }

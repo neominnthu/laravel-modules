@@ -10,7 +10,8 @@
   ],
   "require": {
     "php": ">=8.3",
-    "illuminate/support": "^12.0"
+    "illuminate/support": "^12.0",
+    "illuminate/filesystem": "^12.0"
   },
   "autoload": {
     "psr-4": {
@@ -27,7 +28,7 @@
       ]
     },
     "funding": [
-      {"type": "github", "url": "https://github.com/sponsors/yourname"}
+      {"type": "github", "url": "https://github.com/sponsors/neominnthu"}
     ],
     "support": {
   "issues": "https://github.com/neominnthu/laravel-modules/issues",
@@ -41,8 +42,12 @@
   },
   "scripts": {
     "test": "vendor/bin/pest",
-  "format": "vendor/bin/pint",
-  "analyse": "vendor/bin/phpstan analyse"
+    "format": "vendor/bin/pint",
+    "analyse": "vendor/bin/phpstan analyse"
+  },
+  "suggest": {
+    "orchestra/testbench": "Required for running the package test suite.",
+    "nunomaduro/collision": "Improved CLI error handling and reporting."
   },
   "require-dev": {
     "pestphp/pest": "^3.0",
